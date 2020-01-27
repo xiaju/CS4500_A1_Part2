@@ -11,11 +11,6 @@
 class Object {
 
 public:
-    virtual int hashCode() {
-        return 1;
-    }
-
-    virtual bool equals(Object* object) {
-        return this == object;
-    }
+    virtual size_t hash();
+    virtual bool equals(Object* object);
 };

@@ -8,7 +8,6 @@
 #endif //PART2_HASHMAP_H
 
 #pragma once;
-#include <cstring>
 #include "object.h"
 #include "hashnode.h"
 
@@ -41,7 +40,7 @@ public:
     /**
      * Returns the capacity of key-value (Hashnode) mappings in this map.
      */
-    int get_cap();
+    int capacity();
 
     /**
      * return index for hashcode of key
@@ -79,7 +78,7 @@ public:
      * @param key   The key whose presence in this map is to be tested
      * @return  true if this map contains a mapping for the specified key, otherwise false
      */
-    bool containsKey(Object* key);
+    bool contains_key(Object* key);
 
 
     /**
@@ -93,7 +92,7 @@ public:
     /**
      * @return  a list of the keys contained in this map
      */
-    Object** keys();
+    Object** key_set();
 
 
     /**
@@ -101,163 +100,7 @@ public:
      */
     Object** values();
 
+    size_t hash();
+
+    bool equals(Object* object);
 };
-Hashmap:: Hashmap() : Object(){
-    table = new Hashnode* [16];
-    size = 0;
-    capacity = 16;
-    for(int i = size; i < capacity; i++){
-        table[i] = nullptr;
-    }
-}
-
-Hashmap:: ~Hashmap() {
-    delete[] table;
-}
-
-int Hashmap:: get_size(){
-    return size;
-}
-
-int Hashmap:: get_cap(){
-    return capacity;
-}
-
-int Hashmap:: index_for(Object* key) {
-    if(key) {
-        return key->hashCode() & (capacity - 1);
-    }
-}
-
-void Hashmap:: resize() {
-    capacity *= 2;
-    Hashnode** newTable = new Hashnode* [capacity];
-    for(int i = 0; i < size; i++){
-        Hashnode* needAdd = new Hashnode(table[i]);
-        while(table[i] != NULL) {
-            int index = index_for(needAdd->_key);
-            while(newTable[index] != NULL) {
-                newTable[index] = newTable[index]->next;
-            }
-            newTable[index] = needAdd;
-            table[i] = table[i]->next;
-        }
-    }
-    delete [] table;
-    table = newTable;
-}
-
-Object* Hashmap:: put(Object* key, Object* val) {
-
-    if(size == capacity) {
-        resize();
-    }
-
-    int index = index_for(key);
-
-    Hashnode* node = new Hashnode(key, val);
-
-    Hashnode* cur = table[index];
-
-    if(cur == NULL) {
-        table[index] = node;
-        size++;
-    }
-    else {
-        while(cur->next != NULL) {
-            if(cur->_key->equals(key)){
-                cur->_value = val;
-                return cur->_value;
-            }
-            cur = cur->next;
-        }
-
-        if(cur->_key->equals(key)) {
-            cur->_value = val;
-        } else {
-            cur->next = node;
-            size++;
-        }
-    }
-    return NULL;
-}
-
-
-Object* Hashmap:: get(Object* key){
-    int index = index_for(key);
-
-    Hashnode* cur = table[index];
-
-    while(cur != NULL){
-        if(cur->_key->equals(key)){
-            return cur->_value;
-        }
-        cur = cur->next;
-    }
-    return NULL;
-}
-
-bool Hashmap:: containsKey(Object* key){
-    int index = index_for(key);
-
-    Hashnode* cur = table[index];
-
-    while(cur != NULL){
-        if(cur->_key->equals(key)){
-            return true;
-        }
-        cur = cur->next;
-    }
-    return false;
-}
-
-Object* Hashmap:: remove(Object* key) {
-    int index = index_for(key);
-    Hashnode* cur = table[index];
-    Hashnode* pre = NULL;
-
-    while(cur != NULL){
-        if(cur->_key->equals(key)){
-            if(pre != NULL){
-                pre->next = cur->next;
-            } else {
-                table[index] = cur->next;
-            }
-            size--;
-            return cur->_value;
-        }
-        else{
-            pre = cur;
-            cur = cur->next;
-        }
-    }
-    return NULL;
-}
-
-Object** Hashmap:: keys(){
-    Object** result = new Object*[size];
-    int key_size = 0;
-    for(int i = 0; i < capacity; i++){
-        Hashnode* cur = table[i];
-        while(cur != NULL){
-            result[key_size] = cur->_key;
-            cur = cur->next;
-            key_size++;
-        }
-    }
-    return result;
-}
-
-Object** Hashmap:: values() {
-    Object** result = new Object*[size];
-    int key_size = 0;
-    for(int i = 0; i < capacity; i++){
-        Hashnode* cur = table[i];
-        while(cur != NULL){
-            result[key_size] = cur->_value;
-            cur = cur->next;
-            key_size++;
-        }
-    }
-    return result;
-}

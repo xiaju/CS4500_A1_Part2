@@ -8,7 +8,6 @@
 #endif //PART2_HASHNODE_H
 
 #pragma once;
-#include <cstring>
 #include "object.h"
 
 /**
@@ -42,19 +41,9 @@ public:
     * Hashnode destructor that delete Hashnode object
     */
     ~Hashnode();
+
+    bool equals(Object* object)
+
+    size_t hash();
 };
-
-Hashnode::Hashnode(Object* key, Object* val) :Object() {
-    _key = key;
-    _value = val;
-    next = NULL;
-}
-
-Hashnode:: Hashnode(Hashnode* node) :Object() {
-    _key = node -> _key;
-    _value = node -> _value;
-    next = nullptr;
-}
-
-Hashnode:: ~Hashnode() {}
 
