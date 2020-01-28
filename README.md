@@ -1,3 +1,15 @@
-This is custom Hashmap that is written in CwC. It is implemented by using an array of a linked list. It stores the data in key-value pairs and retrieve it in constant time. To access a value one must know its associated key.It is known as Hashmap because it uses a technique called hashing.In hashing, hash functions are used to link key and value in hashmap.
-Objects are stored by calling put(key, value) of hashmap and retrieve it by calling get(key).When we call put method, hashcode() of key object is called so that hash function can find bucket location to store value object, which is actually an index of internal array, known as the table.It internally stores mapping in the form of Hashnode object which containsboth key and value object.When you want to retrieve an object, you can call get() method and again pass the key object.This time the key object generate the same hashcode and it ends up at the same bucket location.When you call put() method to store the data and the key object generate the same hash code, collision occurs in this case. The data will be append at the end of the linked list.
-Since the internal array of Hashmap is of fixed size. If you keep adding data to hashmap, at some point of time internal array will be filled up. The size of array will be doubled(default capacity is 16, so it will be 32 after resized).Also all the elements in the hashmap will be rearranged based on new hashing index.
+Map should support the following operation:
+1) get_size() // return the number of  key-value pair in the map
+2) get_capacity();
+3) resize();   // map should be able to dynamically allocate new space if necessary (or shrink)
+4) put(Object* key, Object* val);  // put a key-value pair into the map, if the key already exist, override its associated value
+5) get(Object* key); // get the value mapped to the given key if key exists, otherwise, return nullptr
+6) contains_key(Object* key);  //check if the given key exist in the map
+7) remove(Object* key); // remove a key-value pair from the map
+8) Object** key_set(); // List out all of the keys in this map
+9) Object** values(); // Listout all of the values in this map
+Note:
+detailed description of methods above can be found in map.h.
+map should support all kinds of object->object mapping, or at least, String->Object mapping
+all key-value pair in a map should follow the map's contract (ex: a Map of String->String can not store a key-value pair of type String -> Int)
+

@@ -27,7 +27,7 @@ public:
     ~String();
 
 public:
-    size_t hashCode();
+    size_t hash();
     bool equals(Object* object);
     String* concat(String* s);
     int compareTo(String* s);
