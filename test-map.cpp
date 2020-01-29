@@ -1,4 +1,3 @@
-#pragma once;
 #include <iostream>
 #include <string.h>
 #include "map.h"
@@ -15,6 +14,7 @@ void t_false(bool p) { if (p) FAIL(); }
  * test cases for put() and get_size() methods
  * put an object(in this case we used string) will increase the size of Map
  */
+
 void test1() {
     Map* h1 = new Map();
     String * key_1 = new String("Hello");
@@ -41,7 +41,7 @@ void test2() {
     t_true(h1->get_size() == 1);
     h1->put(key_1, val_2);
     t_true(h1->get_size() == 1);
-    t_false(val_1 -> equals(h1->get(key_1)))
+    t_false(val_1 -> equals(h1->get(key_1)));
     OK("2");
 }
 
@@ -67,7 +67,7 @@ void test3() {
  */
 void test4() {
     Map* h1 = new Map();
-    t_true(h1 -> get(new String("1")) == nullptr)
+    t_true(h1 -> get(new String("1")) == nullptr);
     OK("3");
 }
 
@@ -151,8 +151,8 @@ void test8() {
     h1->put(key_1, val_1);
     h1->put(key_2, val_2);
     h1->put(key_3, val_3);
-    Object** values_array;
-    values_array = h1->values();
+    Object** values_array = h1->values();
+    Object** keys_array = h1->key_set();
     t_true(val_1 -> equals(keys_array[0]));
     t_true(val_2 -> equals(keys_array[1]));
     t_true(val_3 -> equals(keys_array[2]));

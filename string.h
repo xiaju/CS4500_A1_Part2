@@ -7,7 +7,7 @@
 
 #endif //ASSIGNMENT1_PART2_STRING_H
 
-#pragma once;
+#pragma once
 #include "object.h"
 #include <stdio.h>
 #include <string.h>
