@@ -137,6 +137,11 @@ public:
       Node* existing_list = this->buckets_[bucket];
       if (existing_list == NULL) {
         return NULL;
+      } 
+      else if (existing_list->key_->equals(key)) {
+        Node* tmp = existing_list;
+        existing_list = existing_list->next;
+        return tmp->value_;
       } else {
         Node* removed_node = existing_list->remove(key);
         if (removed_node == NULL) {
@@ -161,6 +166,7 @@ public:
         if (existing_list != NULL) {
           while (existing_list != NULL) {
             key_set[key_set_ind] = existing_list->key_;
+            existing_list = existing_list->next;
             key_set_ind++;
           }
         }
@@ -182,6 +188,7 @@ public:
         if (existing_list != NULL) {
           while (existing_list != NULL) {
             values[values_ind] = existing_list->value_;
+            existing_list = existing_list->next;
             values_ind++;
           }
         }
@@ -207,6 +214,7 @@ public:
             if (other->get(existing_list->key_) != existing_list->value_) {
               return false;
             }
+            existing_list = existing_list->next;
           }
         }
       } 

@@ -4,7 +4,7 @@
 #include "string.h"
 
 
-void FAIL() {   exit(1);    }
+void FAIL() {   std::cout << "failure" << std::endl ;    }
 void OK(const char* m) { std:: cout << "All test cases in test " << m << " are passed" << std:: endl;}
 void t_true(bool p) { if (!p) FAIL(); }
 void t_false(bool p) { if (p) FAIL(); }
@@ -68,7 +68,7 @@ void test3() {
 void test4() {
     Map* h1 = new Map();
     t_true(h1 -> get(new String("1")) == nullptr);
-    OK("3");
+    OK("4");
 }
 
 
@@ -153,9 +153,12 @@ void test8() {
     h1->put(key_3, val_3);
     Object** values_array = h1->values();
     Object** keys_array = h1->key_set();
-    t_true(val_1 -> equals(keys_array[0]));
-    t_true(val_2 -> equals(keys_array[1]));
-    t_true(val_3 -> equals(keys_array[2]));
+    t_true(key_1 -> equals(keys_array[0]));
+    t_true(key_2 -> equals(keys_array[1]));
+    t_true(key_3 -> equals(keys_array[2]));
+    t_true(val_1 -> equals(values_array[0]));
+    t_true(val_2 -> equals(values_array[1]));
+    t_true(val_3 -> equals(values_array[2]));
     OK("9");
 }
 
