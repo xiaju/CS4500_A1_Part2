@@ -13,7 +13,7 @@
 
 class Map : public Object {
 public:
-    Node** buckets_;
+    LinkedList** buckets_;
     int capacity;
     int size;
 
@@ -22,8 +22,7 @@ public:
      * the default initial capacity 16
     */
     Map() {
-      this->capacity = 16;
-      this->buckets_ = new Node*[this->capacity];
+      this->create_ll(16);
       this->size = 0;
     }
 
@@ -32,12 +31,14 @@ public:
      */
     ~Map() {
       for (size_t i = 0; i < this->capacity; i++) {
-        Node* cur = this->buckets_[i];
+        LinkedList* existing_list = this->buckets_[i];
+        Node* cur = existing_list->get_next();
         while (cur != NULL) {
-          Node* tmp = cur->next;
+          existing_list->remove(cur->key_);
           delete cur;
-          cur = tmp;
+          cur = existing_list->get_next();
         }
+        delete this->buckets_[i];
       }
       delete this->buckets_;
     }
@@ -69,24 +70,16 @@ public:
      */
     Object* put(Object* key, Object* val) {
       int bucket = this->get_bucket(key);
-      Node* existing_list = this->buckets_[bucket];
-      if (existing_list == NULL) {
+      LinkedList* existing_list = this->buckets_[bucket];
+      Node* node_w_same_key = existing_list->get_node(key);
+      if (node_w_same_key == NULL) {
         Node* new_node = new Node(key, val);
-        this->buckets_[bucket] = new_node;
+        existing_list->insert(new_node);
         this->size++;
+        this->rehash();
       } else {
-        Node* node_w_same_key = existing_list->get_node(key);
-        if (node_w_same_key == NULL) {
-          Node* new_node = new Node(key, val);
-          new_node->insert(existing_list);
-          this->buckets_[bucket] = new_node;
-          this->size++;
-          this->rehash();
-        } else {
-          node_w_same_key->set_value(val);
-        }
+        node_w_same_key->set_value(val);
       }
-
       return val;
     }
 
@@ -98,10 +91,7 @@ public:
      */
     Object* get(Object* key) {
       int bucket = this->get_bucket(key);
-      Node* existing_list = this->buckets_[bucket];
-      if (existing_list == NULL) {
-        return NULL;
-      }
+      LinkedList* existing_list = this->buckets_[bucket];
       Node* node_w_same_key = existing_list->get_node(key);
       if (node_w_same_key != NULL) {
         return node_w_same_key->value_;
@@ -118,7 +108,7 @@ public:
      */
     bool contains_key(Object* key) {
       int bucket = this->get_bucket(key);
-      Node* existing_list = this->buckets_[bucket];
+      LinkedList* existing_list = this->buckets_[bucket];
       if (existing_list == NULL) {
         return false;
       } else {
@@ -134,22 +124,13 @@ public:
      */
     Object* remove(Object* key) {
       int bucket = this->get_bucket(key);
-      Node* existing_list = this->buckets_[bucket];
-      if (existing_list == NULL) {
+      LinkedList* existing_list = this->buckets_[bucket];
+      Node* removed_node = existing_list->remove(key);
+      if (removed_node == NULL) {
         return NULL;
-      } 
-      else if (existing_list->key_->equals(key)) {
-        Node* tmp = existing_list;
-        existing_list = existing_list->next;
-        return tmp->value_;
       } else {
-        Node* removed_node = existing_list->remove(key);
-        if (removed_node == NULL) {
-          return NULL;
-        } else {
-          this->size--;
-          return removed_node->value_;
-        }
+        this->size--;
+        return removed_node->value_;
       }
     }
 
@@ -162,13 +143,13 @@ public:
       int key_set_ind = 0;
 
       for (int i = 0; i < this->get_capacity(); i++) {
-        Node* existing_list = this->buckets_[i];
-        if (existing_list != NULL) {
-          while (existing_list != NULL) {
-            key_set[key_set_ind] = existing_list->key_;
-            existing_list = existing_list->next;
-            key_set_ind++;
-          }
+        LinkedList* existing_list = this->buckets_[i];
+        existing_list->reset_cur();
+        Node* cur = existing_list->get_next();
+        while (cur != NULL) {
+          key_set[key_set_ind] = cur->key_;
+          key_set_ind++;
+          cur = existing_list->get_next();
         }
       }
       return key_set;
@@ -184,13 +165,13 @@ public:
       int values_ind = 0;
 
       for (int i = 0; i < this->get_capacity(); i++) {
-        Node* existing_list = this->buckets_[i];
-        if (existing_list != NULL) {
-          while (existing_list != NULL) {
-            values[values_ind] = existing_list->value_;
-            existing_list = existing_list->next;
-            values_ind++;
-          }
+        LinkedList* existing_list = this->buckets_[i];
+        existing_list->reset_cur();
+        Node* cur = existing_list->get_next();
+        while (cur != NULL) {
+          values[values_ind] = cur->value_;
+          cur = existing_list->get_next();
+          values_ind++;
         }
       }
       return values;
@@ -208,14 +189,14 @@ public:
       }
 
       for (int i = 0; i < this->get_capacity(); i++) {
-        Node* existing_list = this->buckets_[i];
-        if (existing_list != NULL) {
-          while (existing_list != NULL) {
-            if (other->get(existing_list->key_) != existing_list->value_) {
-              return false;
-            }
-            existing_list = existing_list->next;
+        LinkedList* existing_list = this->buckets_[i];
+        existing_list->reset_cur();
+        Node* cur = existing_list->get_next();
+        while (cur != NULL) {
+          if (other->get(cur->key_) != cur->value_) {
+            return false;
           }
+          cur = existing_list->get_next();
         }
       } 
 
@@ -228,19 +209,19 @@ public:
       return h % this->get_capacity();
     }
 
+    // TODO verify that this is working!
     void rehash() {
       if ((float)this->get_size() / this->get_capacity() < .75) {
         return ;
       }
-      int size = this->get_size();
 
-      Node** old_buckets = this->buckets_;
-      this->capacity = this->capacity * 2;
-      this->buckets_ = new Node*[this->capacity];
-      this->size = 0;
+      int size = this->get_size();
 
       Object** keys = this->key_set();
       Object** values = this->values();
+
+      this->create_ll(this->get_capacity() * 2);
+      this->size = 0;
 
       for (int i = 0; i < size; i++) {
         this->put(keys[i], values[i]);
@@ -248,5 +229,14 @@ public:
 
       delete keys;
       delete values;
+    }
+
+    void create_ll(int capacity) {
+      this->capacity = capacity;
+      this->buckets_ = new LinkedList*[this->capacity];
+      
+      for (int i = 0; i < capacity; i++) {
+        this->buckets_[i] = new LinkedList();
+      }
     }
 };
